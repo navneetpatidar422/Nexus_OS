@@ -61,6 +61,12 @@ const MODULES = [
     }
 ];
 
+// --- WINNERS LIST ---
+const WINNERS = [
+    "Navneet Patidar", 
+    "User012"
+];
+
 export default function App() {
   const [booted, setBooted] = useState(false);
   const [username, setUsername] = useState("GUEST");
@@ -350,11 +356,28 @@ export default function App() {
                      />
                 </div>
 
-                <div className="flex-1 border border-green-900/20 p-2 bg-black/40 relative flex flex-col justify-end">
-                    <div className="text-[10px] text-green-700 mb-2 flex justify-between">
-                        <span>CPU_CORES</span>
-                        <span>{timeLeft % 100}%</span>
+                <div className="flex-1 border border-green-900/20 p-2 bg-black/40 relative flex flex-col justify-between">
+                    {/* WINNERS LIST */}
+                    <div className="mb-2 overflow-y-auto max-h-[150px] scrollbar-hide">
+                         <div className="text-[10px] text-green-500 font-bold mb-2 uppercase tracking-widest border-b border-green-900/50 pb-1 flex justify-between items-center">
+                             <span>TOP_OPERATORS</span>
+                             <span className="animate-pulse text-[8px] bg-green-900/30 px-1 rounded">LIVE</span>
+                         </div>
+                         <div className="flex flex-col gap-1">
+                             {WINNERS.map((winner, idx) => (
+                                 <div key={idx} className="text-[10px] text-green-400 font-mono flex items-center gap-2 group cursor-default">
+                                     <span className="text-green-800 font-bold group-hover:text-green-500 transition-colors">0{idx + 1}</span>
+                                     <span className="opacity-80 group-hover:opacity-100 transition-opacity">{winner}</span>
+                                 </div>
+                             ))}
+                         </div>
                     </div>
+
+                    <div>
+                        <div className="text-[10px] text-green-700 mb-2 flex justify-between">
+                            <span>CPU_CORES</span>
+                            <span>{timeLeft % 100}%</span>
+                        </div>
                     {[1,2,3,4].map(i => (
                         <div key={i} className="flex items-center gap-2 mb-1">
                             <span className="text-[10px] w-4 text-green-800">0{i}</span>
@@ -382,6 +405,7 @@ export default function App() {
                         }} />
                     </div>
                 </div>
+            </div>
             </div>
 
             {/* CENTER PANEL */}
