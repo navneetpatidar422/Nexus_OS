@@ -12,6 +12,7 @@ import { WarpGrid } from "./components/future/WarpGrid";
 import { DataStream } from "./components/future/DataStream";
 import { CustomCursor } from "./components/CustomCursor";
 import { SequenceLock, PatternMatch, AnomalyDetection } from "./components/future/LogicPuzzles";
+import { TelemetryPanel } from "./components/future/TelemetryPanel";
 import { motion, AnimatePresence } from "motion/react";
 import { Activity, Wifi, Lock, ShieldAlert, Database, Grid3X3, Layers, User, Globe, Clock, Terminal, FileCode, FolderClosed, Key, ShieldCheck } from "lucide-react";
 import { toast, Toaster } from "sonner";
@@ -62,7 +63,7 @@ const MODULES = [
 ];
 
 // --- WINNERS LIST ---
-const WINNERS = [
+const INITIAL_WINNERS = [
     "Navneet Patidar", 
     "User012"
 ];
@@ -70,6 +71,7 @@ const WINNERS = [
 export default function App() {
   const [booted, setBooted] = useState(false);
   const [username, setUsername] = useState("GUEST");
+  const [winners, setWinners] = useState<string[]>(INITIAL_WINNERS);
   
   // Progression State
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
@@ -287,8 +289,18 @@ export default function App() {
       );
   }
 
+  const handleAdminUnlock = () => {
+      // Add current user to winners list
+      setWinners(prev => {
+          const newList = [username, ...prev];
+          // Keep only top 5
+          return newList.slice(0, 5);
+      });
+      setActiveView("CERTIFICATE");
+  };
+
   if (activeView === "ADMIN_PORTAL") {
-      return <AdminPortal username={username} onUnlock={() => setActiveView("CERTIFICATE")} />;
+      return <AdminPortal username={username} onUnlock={handleAdminUnlock} />;
   }
   if (activeView === "CERTIFICATE") {
       return <Certificate username={username} />;
@@ -364,12 +376,21 @@ export default function App() {
                              <span className="animate-pulse text-[8px] bg-green-900/30 px-1 rounded">LIVE</span>
                          </div>
                          <div className="flex flex-col gap-1">
-                             {WINNERS.map((winner, idx) => (
-                                 <div key={idx} className="text-[10px] text-green-400 font-mono flex items-center gap-2 group cursor-default">
+                             <AnimatePresence>
+                             {winners.map((winner, idx) => (
+                                 <motion.div 
+                                    key={`${winner}-${idx}`}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                                    className="text-[10px] text-green-400 font-mono flex items-center gap-2 group cursor-default"
+                                 >
                                      <span className="text-green-800 font-bold group-hover:text-green-500 transition-colors">0{idx + 1}</span>
                                      <span className="opacity-80 group-hover:opacity-100 transition-opacity">{winner}</span>
-                                 </div>
+                                 </motion.div>
                              ))}
+                             </AnimatePresence>
                          </div>
                     </div>
 
@@ -509,36 +530,22 @@ export default function App() {
                 </div>
 
                 {/* Keyboard & Logs */}
-                <div className="h-40 border-t border-green-900/30 pt-4 flex flex-col gap-2 bg-black/40 backdrop-blur z-20">
-                    <div className="flex-1 overflow-y-auto text-[10px] font-mono text-green-600/80 mb-2 scrollbar-hide px-2">
+                <div className="h-[300px] border-t border-green-900/30 pt-4 flex flex-col gap-2 bg-black/40 backdrop-blur z-[250] relative">
+                    <div className="absolute top-0 right-0 p-2 z-10">
+                        <div className="text-[8px] text-green-900 font-mono">SYS_LOGS</div>
+                    </div>
+                    <div className="h-20 overflow-y-auto text-[10px] font-mono text-green-600/80 mb-2 scrollbar-hide px-2 relative z-0 opacity-50 hover:opacity-100 transition-opacity">
                         {logs.map((l, i) => <div key={i} className="border-l-2 border-green-900/50 pl-2 mb-1">{l}</div>)}
                     </div>
-                    <VirtualKeyboard />
+                    <div className="flex-1 flex items-center justify-center -mt-8">
+                         <VirtualKeyboard />
+                    </div>
                 </div>
             </div>
 
             {/* RIGHT PANEL */}
             <div className="border-l border-green-900/30 pl-4 flex flex-col gap-6 hidden lg:flex backdrop-blur-sm bg-black/40 z-50">
-                 <div className="aspect-square border border-green-900/30 rounded-full relative flex items-center justify-center overflow-hidden bg-black">
-                     <div className="absolute inset-0 border-[20px] border-green-900/10 rounded-full" />
-                     <div className="w-full h-full border-t-2 border-green-500/50 animate-[spin_3s_linear_infinite]" />
-                     <div className="absolute w-2 h-2 bg-green-500 rounded-full animate-ping shadow-[0_0_10px_rgba(34,197,94,1)]" style={{ top: '30%', left: '60%' }} />
-                 </div>
-                 <div className="text-center text-xs text-green-700 tracking-widest">ACTIVE_SCAN</div>
-
-                 <div className="flex-1 border border-green-900/20 p-2 relative flex flex-col justify-end">
-                     <div className="absolute top-2 left-2 text-[10px] text-green-700">PACKET_LOSS: 0.0%</div>
-                     <div className="flex items-end gap-1 h-32">
-                         {[...Array(12)].map((_, i) => (
-                             <motion.div 
-                                key={i}
-                                className="flex-1 bg-green-500/20 border-t border-green-500/50"
-                                animate={{ height: ["10%", "90%", "30%"] }}
-                                transition={{ duration: 0.2 + Math.random(), repeat: Infinity, repeatType: "mirror" }}
-                             />
-                         ))}
-                     </div>
-                 </div>
+                 <TelemetryPanel />
 
                  {/* Creative Creator Credit */}
                  <div className="mt-auto pt-4 border-t border-green-900/30 text-right group cursor-help relative h-20">

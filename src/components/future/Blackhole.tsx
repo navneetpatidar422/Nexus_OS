@@ -30,6 +30,103 @@ export const Blackhole = ({ onCommand }: BlackholeProps) => {
         }
     };
 
+    // Listen for Virtual Keyboard events
+    React.useEffect(() => {
+        if (!isOpen) return;
+
+        const handleVirtualInput = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const char = customEvent.detail;
+            
+            if (char === "ENTER") {
+                // Trigger submit
+                // We can't easily trigger the form submit event, so we call logic directly
+                // But we need the current 'key' state which isn't available in this closure
+                // unless we include it in dependency array or use ref.
+                // Simpler: Just handle regular typing here.
+                // For Submit, we'll need a ref or effect trigger.
+                // Let's just handle text input.
+            } else if (char === "BACK") {
+                setKey(prev => prev.slice(0, -1));
+            } else if (char === "SPACE") {
+                setKey(prev => prev + " ");
+            } else if (char.length === 1) {
+                setKey(prev => prev + char);
+            }
+        };
+
+        window.addEventListener("virtual-keydown", handleVirtualInput);
+        return () => window.removeEventListener("virtual-keydown", handleVirtualInput);
+    }, [isOpen]);
+
+    // Handle Enter separately to avoid closure staleness or complexity
+    React.useEffect(() => {
+        const handleEnter = (e: Event) => {
+             const customEvent = e as CustomEvent;
+             if (customEvent.detail === "ENTER" && isOpen) {
+                 // Trigger validation
+                 const input = key.toUpperCase().trim(); // usage of 'key' here is tricky in effect
+                 // Actually, let's just use the ref pattern or simple key dependency
+             }
+        };
+    }, [isOpen, key]);
+
+    // Better approach: Single effect with refs or just dependency on 'key'
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleVirtual = (e: Event) => {
+            const char = (e as CustomEvent).detail;
+            if (char === "BACK") setKey(prev => prev.slice(0, -1));
+            else if (char === "SPACE") setKey(prev => prev + " ");
+            else if (char === "ESC") setIsOpen(false);
+            else if (char.length === 1) setKey(prev => prev + char);
+            else if (char === "ENTER") {
+                // We need to call handleUnlock. But handleUnlock uses 'key' from state.
+                // We can just duplicate the logic or wrap it.
+                // We can't invoke the form submit easily.
+                // Let's just check the key state here? No, 'key' is stale in listener.
+                // We must use functional state update or refs.
+                // But validation needs the *current* full value.
+                
+                // Hack: We can't easily validate inside the event listener without a Ref to the current key.
+            }
+        };
+        window.addEventListener("virtual-keydown", handleVirtual);
+        return () => window.removeEventListener("virtual-keydown", handleVirtual);
+    }, [isOpen]);
+
+    // Ref for key to access in event listener
+    const keyRef = React.useRef(key);
+    React.useEffect(() => { keyRef.current = key; }, [key]);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleVirtual = (e: Event) => {
+            const char = (e as CustomEvent).detail;
+            if (char === "BACK") setKey(prev => prev.slice(0, -1));
+            else if (char === "SPACE") setKey(prev => prev + " ");
+            else if (char === "ESC") setIsOpen(false);
+            else if (char.length === 1) setKey(prev => prev + char);
+            else if (char === "ENTER") {
+                const input = keyRef.current.toUpperCase().trim();
+                if (input === "NAVNEETOS195" || input === "NAVNEETOS196") {
+                    setWarping(true);
+                    setTimeout(() => {
+                        onCommand(input);
+                        setWarping(false);
+                        setIsOpen(false);
+                        setKey("");
+                    }, 2000);
+                } else {
+                    toast.error("SINGULARITY COLLAPSE: INVALID KEY");
+                    setKey("");
+                }
+            }
+        };
+        window.addEventListener("virtual-keydown", handleVirtual);
+        return () => window.removeEventListener("virtual-keydown", handleVirtual);
+    }, [isOpen, onCommand]);
+
     return (
         <>
             {/* Trigger Button */}
