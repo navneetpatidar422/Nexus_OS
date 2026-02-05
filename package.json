@@ -2,9 +2,7 @@
   "name": "Nexus_OS",
   "version": "0.1.0",
   "private": true,
-
   "homepage": "https://YOUR_USERNAME.github.io/Nexus_OS",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,7 +10,6 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -44,7 +41,9 @@
     "clsx": "*",
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
+    "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",
+    "jspdf": "^4.1.0",
     "lodash": "*",
     "lucide-react": "^0.487.0",
     "motion": "*",
@@ -59,11 +58,10 @@
     "tailwind-merge": "*",
     "vaul": "^1.1.2"
   },
-
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@vitejs/plugin-react-swc": "^3.10.2",
-    "vite": "6.3.5",
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.1.1",
+    "vite": "6.3.5"
   }
 }
